@@ -1,0 +1,19 @@
+{
+  "name": "cyolo_home_assignment",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --experimental-modules tests/*.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "chai-http": "^4.4.0",
+    "mocha": "^11.3.0",
+    "supertest": "^7.1.1"
+  }
+}
