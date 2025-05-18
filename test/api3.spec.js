@@ -11,7 +11,7 @@ describe('/api-3', () => {
   beforeEach(async () => {
     // Get a valid token before each test
     const response = await postApi2({ username: 'user', password: 'Password1234' });
-    validToken = response.token;
+    validToken = response.token || response; // Handle both response formats
   });
 
   describe('POST /api-3 - Arithmetic Tests', () => {

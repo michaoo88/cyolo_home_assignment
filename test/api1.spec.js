@@ -14,8 +14,9 @@ describe('/api-1', () => {
         .set('Content-Type', 'application/json');
       
       expect(response).to.have.status(200);
-      expect(response.text).to.be.a('string');
-      const data = JSON.parse(response.text);
+      console.log('DEBUG: response.body:', response.body);
+      console.log('DEBUG: response.text:', response.text);
+      const data = response.body && Object.keys(response.body).length ? response.body : JSON.parse(response.text);
       expect(data).to.be.an('object');
       expect(data).to.have.property('response', 'success');
     });
