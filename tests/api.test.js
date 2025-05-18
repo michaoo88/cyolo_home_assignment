@@ -1,74 +1,38 @@
 import { expect } from 'chai';
-import request from 'supertest';
+import { getApi1, postApi2 } from '../api.js';
 
-const BASE_URL = 'http://localhost:8080';
-
-describe('API Tests', function () {
-  describe('GET /api-1', function () {
-    it('should return success', async function () {
-      try {
-        const response = await request(BASE_URL)
-          .get('/api-1')
-          .set('Accept', 'application/json')
-          .set('Content-Type', 'application/json');
-        
-        console.log('GET /api-1 Response Status:', response.status);
-        console.log('GET /api-1 Response Headers:', response.headers);
-        console.log('GET /api-1 Response Text:', response.text);
-        
-        const body = JSON.parse(response.text);
-        expect(response.status).to.equal(200);
-        expect(body).to.be.an('object');
-        expect(body).to.have.property('response', 'success');
-      } catch (error) {
-        console.error('GET /api-1 Error:', error);
-        throw error;
-      }
+describe('API Integration Tests', () => {
+  describe('GET /api-1', () => {
+    it('should return a success response', async () => {
+      const response = await getApi1();
+      expect(response).to.be.an('object')
+        .and.to.have.property('response', 'success');
     });
   });
 
-  describe('POST /api-2', function () {
-    it('should return token for valid credentials', async function () {
-      try {
-        const response = await request(BASE_URL)
-          .post('/api-2')
-          .set('Accept', 'application/json')
-          .set('Content-Type', 'application/json')
-          .send({ username: 'User', password: 'Password4321' });
-        
-        console.log('POST /api-2 Response Status:', response.status);
-        console.log('POST /api-2 Response Headers:', response.headers);
-        console.log('POST /api-2 Response Text:', response.text);
-        
-        const body = JSON.parse(response.text);
-        expect(response.status).to.equal(200);
-        expect(body).to.be.an('object');
-        expect(body).to.have.property('token');
-      } catch (error) {
-        console.error('POST /api-2 Error:', error);
-        throw error;
-      }
+  describe('POST /api-2', () => {
+    const validCredentials = {
+      username: 'User',
+      password: 'Password4321'
+    };
+
+    const invalidCredentials = {
+      username: 'User',
+      password: 'WrongPass'
+    };
+
+    it('should return a token for valid credentials', async () => {
+      const response = await postApi2(validCredentials);
+      expect(response).to.be.an('object')
+        .and.to.have.property('token');
     });
 
-    it('should fail with invalid credentials', async function () {
+    it('should throw unauthorized error for invalid credentials', async () => {
       try {
-        const response = await request(BASE_URL)
-          .post('/api-2')
-          .set('Accept', 'application/json')
-          .set('Content-Type', 'application/json')
-          .send({ username: 'User', password: 'WrongPass' });
-        
-        console.log('POST /api-2 (invalid) Response Status:', response.status);
-        console.log('POST /api-2 (invalid) Response Headers:', response.headers);
-        console.log('POST /api-2 (invalid) Response Text:', response.text);
-        
-        const body = JSON.parse(response.text);
-        expect(response.status).to.equal(401);
-        expect(body).to.be.an('object');
-        expect(body).to.have.property('response', 'unauthorized');
+        await postApi2(invalidCredentials);
+        throw new Error('Expected unauthorized error but got success');
       } catch (error) {
-        console.error('POST /api-2 (invalid) Error:', error);
-        throw error;
+        expect(error.message).to.equal('Unauthorized');
       }
     });
   });
