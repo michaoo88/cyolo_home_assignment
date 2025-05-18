@@ -38,12 +38,8 @@ export async function getApi1(baseUrl = BASE_URL) {
         }
 
         try {
-          const data =
-            typeof res.body === "object" ? res.body : JSON.parse(res.text);
+          const data = parseResponse(res);
           expect(res).to.have.status(200);
-          expect(data).to.be.an("object");
-          expect(data).to.have.property("response", "success");
-
           resolve(data);
         } catch (error) {
           console.error("GET /api-1 Parse Error:", error);
@@ -71,16 +67,11 @@ export async function postApi2({ username, password }, baseUrl = BASE_URL) {
         }
 
         try {
-          const data =
-            typeof res.body === "object" ? res.body : JSON.parse(res.text);
+          const data = parseResponse(res);
 
           if (res.status === 200) {
-            expect(data).to.be.an("object");
-            expect(data).to.have.property("token");
             resolve(data);
           } else if (res.status === 401) {
-            expect(data).to.be.an("object");
-            expect(data).to.have.property("response", "unauthorized");
             reject(new Error("Unauthorized"));
           } else {
             reject(new Error(`Unexpected status: ${res.status}`));
@@ -94,13 +85,19 @@ export async function postApi2({ username, password }, baseUrl = BASE_URL) {
 }
 
 // POST request to /api-3 endpoint
-export async function postApi3(data, baseUrl = BASE_URL) {
+export async function postApi3(data, baseUrl = BASE_URL, token) {
   return new Promise((resolve, reject) => {
-    chai
+    const request = chai
       .request(baseUrl)
       .post("/api-3")
       .set("Accept", "application/json")
-      .set("Content-Type", "application/json")
+      .set("Content-Type", "application/json");
+
+    if (token) {
+      request.set("Authorization", `${token}`);
+    }
+
+    request
       .send(data)
       .end((err, res) => {
         if (err) {
@@ -110,14 +107,16 @@ export async function postApi3(data, baseUrl = BASE_URL) {
         }
 
         try {
-          const responseData =
-            typeof res.body === "object" ? res.body : JSON.parse(res.text);
+          const responseData = parseResponse(res);
 
           if (res.status === 200) {
-            expect(responseData).to.be.an("object");
             resolve(responseData);
+          } else if (res.status === 401) {
+            reject({ status: res.status, body: responseData });
+          } else if (res.status === 404) {
+            reject({ status: res.status, body: responseData });
           } else {
-            reject(new Error(`Unexpected status: ${res.status}`));
+            reject({ status: res.status, body: responseData });
           }
         } catch (error) {
           console.error("POST /api-3 Parse Error:", error);

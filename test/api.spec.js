@@ -1,12 +1,16 @@
 import { expect } from 'chai';
+import chai from 'chai';
+import chaiHttp from 'chai-http';
 import { getApi1, postApi2 } from '../api.js';
+
+chai.use(chaiHttp);
 
 describe('API Integration Tests', () => {
   describe('GET /api-1', () => {
     it('should return a success response', async () => {
       const response = await getApi1();
-      expect(response).to.be.an('object')
-        .and.to.have.property('response', 'success');
+      expect(response).to.be.an('object');
+      expect(response).to.have.property('response', 'success');
     });
   });
 
@@ -23,8 +27,9 @@ describe('API Integration Tests', () => {
 
     it('should return a token for valid credentials', async () => {
       const response = await postApi2(validCredentials);
-      expect(response).to.be.an('object')
-        .and.to.have.property('token');
+      expect(response).to.be.an('object');
+      expect(response).to.have.property('token');
+      expect(response.token).to.be.a('number');
     });
 
     it('should throw unauthorized error for invalid credentials', async () => {
