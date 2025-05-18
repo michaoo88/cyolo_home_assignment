@@ -50,9 +50,9 @@ Run tests:
 ```bash
 # Run all tests
 npm test
+```
 
-
-## 💡 Test Design Commentary
+## 📝 Test Design Commentary
 
 ### API-1 (Basic Success Check)
 
@@ -101,17 +101,22 @@ npm test
 - Handling of invalid concurrent requests
 - Token expiration during concurrent requests
 
-## 📦 File Structure
-
+## 📦 Project Structure
 ```
-/tests                  # Mocha test files
-  ├── api1.test.js     # Tests for basic success endpoint
-  ├── api2.test.js     # Tests for authentication endpoint
-  └── api3.test.js     # Tests for arithmetic endpoint
-docker-compose.yml      # Spins up Flask backend
-API_Test_Cases.xlsx     # Manual test cases
-README.md              # Project documentation
-package.json           # Node.js dependencies and scripts
+/                      # Project root
+├── backend/           # Python Flask backend service
+├── test/             # Mocha test files
+│   ├── api1.spec.js  # Tests for basic success endpoint
+│   ├── api2.spec.js  # Tests for authentication endpoint
+│   ├── api3.spec.js  # Tests for arithmetic endpoint
+│   ├── concurrency-tests.spec.js
+│   └── multiple-token-authentication.spec.js
+├── api.js            # API client implementation
+├── docker-compose.yml # Docker configuration
+├── package.json      # Node.js dependencies and scripts
+├── package-lock.json # Locked Node.js dependencies
+├── API_Test_Cases.xlsx # Manual test cases
+└── README.md         # Project documentation
 ```
 
 ## 🛠 Suggested Improvements for the Backend
@@ -120,30 +125,30 @@ While working on the tests, I noticed a few things in the backend that could be 
 
 ### 1. Missing `Content-Type: application/json`
 
-- **What’s happening:** The API responses return JSON data, but the `Content-Type` header isn’t explicitly set.
+- **What's happening:** The API responses return JSON data, but the `Content-Type` header isn't explicitly set.
 - **Why it matters:** Some clients might not treat the response as proper JSON, which could cause unexpected issues.
 - **Quick fix:** Add `content_type='application/json'` in the `Response()` calls.
 
 ### 2. Dangerous Token Format
 
-- **What’s happening:** Tokens are a UNIX timestamp.
+- **What's happening:** Tokens are a UNIX timestamp.
 - **Why it matters:** These are predictable and not really secure.
 - **Suggestion:** Use some kind of random token with an expiration time.
 
 ### 3. Error Handling
 
-- **What’s happening:** Most errors return a 501, even if it’s a bad request or auth issue.
+- **What's happening:** Most errors return a 501, even if it's a bad request or auth issue.
 - **Why it matters:** This makes it harder for clients to handle errors properly.
 - **Suggestion:** Return appropriate status codes like 400, 401, 404, or 500 based on the situation.
 
 ### 4. No Input Validation
 
-- **What’s happening:** There’s almost no validation on the incoming data.
+- **What's happening:** There's almost no validation on the incoming data.
 - **Why it matters:** This could lead to type conversion issues or even crashes.
 - **Suggestion:** Add basic checks or use a library.
 
 ### 5. Missing Method Handling
 
-- **What’s happening:** If you send a wrong method (like POST to `/api-1`), you get a default HTML error page.
-- **Why it matters:** That’s not ideal for APIs.
+- **What's happening:** If you send a wrong method (like POST to `/api-1`), you get a default HTML error page.
+- **Why it matters:** That's not ideal for APIs.
 - **Suggestion:** Add proper method handling and return clean JSON error responses.
